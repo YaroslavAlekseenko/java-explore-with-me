@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.practicum.dto.EndpointHitDto;
 import ru.practicum.dto.ViewStatsDto;
+import ru.practicum.server.exception.ValidationRequestException;
 import ru.practicum.server.mappers.EndpointHitMapper;
 import ru.practicum.server.mappers.ViewStatsMapper;
 import ru.practicum.server.repositories.StatServerRepository;
@@ -30,6 +31,8 @@ public class StatServiceImpl implements StatService {
     @Override
     public List<ViewStatsDto> getStats(LocalDateTime start, LocalDateTime end, List<String> uris, Boolean unique) {
         log.debug("Received stats.");
+        if (start.isAfter(end))
+            throw new ValidationRequestException("Date start must be before date end");
         return unique ? viewStatsMapper.toEntityList(statServerRepository.getStatsByUrisAndIp(start, end, uris))
                 : viewStatsMapper.toEntityList(statServerRepository.getStatsByUris(start, end, uris));
     }
